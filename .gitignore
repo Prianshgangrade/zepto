@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.venv/
+venv/
+
+# Environment & Secrets (NEVER commit real secrets)
+.env
+.secrets/
+
+# Per-service databases & event bus files
+data/
+*.db
+*.db-wal
+*.db-shm
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
