@@ -9,6 +9,21 @@ import LoginModal from './components/LoginModal.jsx';
 
 const SESSION_KEY = 'zepto_auth_session';
 
+function createIdempotencyKey() {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return `web-${crypto.randomUUID()}`;
+  }
+  if (typeof crypto !== 'undefined' && typeof crypto.getRandomValues === 'function') {
+    const bytes = new Uint8Array(16);
+    crypto.getRandomValues(bytes);
+    bytes[6] = (bytes[6] & 0x0f) | 0x40;
+    bytes[8] = (bytes[8] & 0x3f) | 0x80;
+    const hex = Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('');
+    return `web-${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+  }
+  return `web-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+}
+
 function loadSavedSession() {
   try {
     const raw = localStorage.getItem(SESSION_KEY);
@@ -197,7 +212,7 @@ export default function App() {
     if (!token) return;
     setCheckingOut(true);
     try {
-      const idempotencyKey = `web-${crypto.randomUUID()}`;
+      const idempotencyKey = createIdempotencyKey();
       const res = await gatewayApi.placeOrder(token, {
         deliveryAddress,
         paymentMethod,
